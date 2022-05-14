@@ -1,12 +1,190 @@
 pragma circom 2.0.0;
 
+include "../node_modules/circomlib/circuits/mimc.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../node_modules/circomlib/circuits/pedersen.circom";
+include "../node_modules/circomlib/circuits/sha256/sha256_2.circom";
 
-template CheckRoot(n) { // compute the root of a MerkleTree of n Levels 
+
+include "../node_modules/circomlib/circuits/comparators.circom";
+
+
+
+template CheckPoseidon() {
+    signal input in;
+    signal output out;
+
+    component p = Poseidon(1);
+    
+    p.inputs[0] <== in;
+    out <== p.out;
+}
+
+// len 902
+// {
+//   pi_a: [
+//     '8998286625385338404786881851519080389515920950991534326783146879452519785539',
+//     '8518588461589408499261664603518496452876314083407287215955969268743432015108',
+//     '1'
+//   ],
+//   pi_b: [
+//     [
+//       '1373060226029726492448535033360739884764863143643363984939245864910409847442',
+//       '12169302185180637559184869593501151376910764746947766475251977424117976625518'
+//     ],
+//     [
+//       '1564080683196101579649537548884053940918978336754933903798643500174012111747',
+//       '17497579506812345393245930008041949324703352449204695566722616826375331809503'
+//     ],
+//     [ '1', '0' ]
+//   ],
+//   pi_c: [
+//     '9795955230719399934553842072995966153469808046156136507265110293175969261672',
+//     '6963824820536636733632489607805489729665514232943623775094542615002469968482',
+//     '1'
+//   ],
+//   protocol: 'groth16',
+//   curve: 'bn128'
+// }
+
+template CheckPedersen() {
+    signal input in;
+    signal output out[2];
+
+    component p = Pedersen(1);
+
+    p.in[0] <== in;
+
+    out[0] <== p.out[0];
+    out[1] <== p.out[1];
+}
+
+// len 904
+// {
+//   pi_a: [
+//     '6453937370474095249405510219524640872093344876278630446705692178181406797892',
+//     '17326206540031893869831074078865822230088308807999876854537056180727634630442',
+//     '1'
+//   ],
+//   pi_b: [
+//     [
+//       '9321483757400728293679419396973362546232242732072854278251404306660032049522',
+//       '4254768007015259668024255664211751149859505874999392365637474463646315956998'
+//     ],
+//     [
+//       '20019159777951557658296141794580276960055810591125511629901680815010898318140',
+//       '21146682552712771050346075711529078985366083246420436026827333703761055986819'
+//     ],
+//     [ '1', '0' ]
+//   ],
+//   pi_c: [
+//     '14759934757314768289273544087710251091743018917886356215104436044240187118355',
+//     '9759425047963847494205434705323984153827819435652166828120012716939221354692',
+//     '1'
+//   ],
+//   protocol: 'groth16',
+//   curve: 'bn128'
+// }
+
+template CheckMimc() {
+    signal input in;
+    signal output out;
+
+    component m = MiMC7(10);
+
+    m.x_in <== in;
+    m.k <== 7;
+
+    out <== m.out;
+}
+
+// len 903
+// {
+//   pi_a: [
+//     '21739971584417894053883716506608958649344879859767718470866371801528125257484',
+//     '15646111754273921094928618458462347180251734673257675872191175285813630208362',
+//     '1'
+//   ],
+//   pi_b: [
+//     [
+//       '5049629455848144887496833125210930200632702560895439911012997748536240399440',
+//       '200172691239624625562232964516457326805515137310497421795123369004105240879'
+//     ],
+//     [
+//       '5385838711390700902686449342032050426433086096216049428379336381580563827298',
+//       '18661540806493091286776560134363718346220928131508514045760017243443742107397'
+//     ],
+//     [ '1', '0' ]
+//   ],
+//   pi_c: [
+//     '20195073307046513778167137038319044924395869897323633802475229876343293785848',
+//     '6240809506494883150021689929004093150177828337971781710862197230777924136430',
+//     '1'
+//   ],
+//   protocol: 'groth16',
+//   curve: 'bn128'
+// }
+
+template CheckSha256() {
+    signal input in;
+    signal output out;
+
+    component s = Sha256_2();
+
+    s.a <== in;
+    s.b <== 0;
+
+    out <== s.out;
+}
+
+// len 904
+// {
+//   pi_a: [
+//     '6429961404492759311985627017841613990152909095979295970227810792956379805565',
+//     '16094019711982414775740043807100812425776836188600799937240673601508600719460',
+//     '1'
+//   ],
+//   pi_b: [
+//     [
+//       '9344677568009956695050250110070073222076644045057668867238651744064236997262',
+//       '17494240450758092409854801280900293196364401040788184473035802257617947199039'
+//     ],
+//     [
+//       '18727890966513009553367668439627086471462958772606723243008567486376105235653',
+//       '18589605620145446173223683714811982816172551475511931425967659137518535672173'
+//     ],
+//     [ '1', '0' ]
+//   ],
+//   pi_c: [
+//     '9584488043419659004515246545014299301991122561830443146489187001782211374370',
+//     '8622616196905639918047697173322834975792288184646242187435125411998405414613',
+//     '1'
+//   ],
+//   protocol: 'groth16',
+//   curve: 'bn128'
+// }
+
+template CheckRoot(n) {
     signal input leaves[2**n];
     signal output root;
 
-    //[assignment] insert your code here to calculate the Merkle root from 2^n leaves
+    component hashes[n + 1][2**n];
+
+    for (var i = 0; i < 2**n; i += 2) {
+        hashes[n-1][i\2] = Poseidon(2);
+        hashes[n-1][i\2].inputs[0] <== leaves[i];
+        hashes[n-1][i\2].inputs[1] <== leaves[i+1];
+    }
+
+    for (var k = n - 1; k > 0; k--) {
+        for (var i = 0; i < 2**k; i += 2) {
+            hashes[k-1][i\2] = Poseidon(2);
+            hashes[k-1][i\2].inputs[0] <== hashes[k][i].out;
+            hashes[k-1][i\2].inputs[1] <== hashes[k][i+1].out;
+        }
+    }
+
+    root <== hashes[0][0].out;
 }
 
 template MerkleTreeInclusionProof(n) {
@@ -14,6 +192,38 @@ template MerkleTreeInclusionProof(n) {
     signal input path_elements[n];
     signal input path_index[n]; // path index are 0's and 1's indicating whether the current element is on the left or right
     signal output root; // note that this is an OUTPUT signal
+    
+    signal tmp[n][2];
 
-    //[assignment] insert your code here to compute the root from a leaf and elements along the path
+    component hashes[n];
+    component izs[n];
+    
+    
+    izs[0] = IsZero();
+    hashes[0] = Poseidon(2);
+    
+    izs[0].in <== path_index[0];
+
+    tmp[0][0] <== leaf * izs[0].out;
+    hashes[0].inputs[0] <== leaf - tmp[0][0]  + path_elements[0] * izs[0].out;
+    
+    tmp[0][1] <== path_elements[0] * izs[0].out;
+    hashes[0].inputs[1] <== leaf * izs[0].out + path_elements[0] - tmp[0][1];
+
+
+    for (var i = 1; i < n; i++) {
+        izs[i] = IsZero();
+        hashes[i] = Poseidon(2);
+
+        izs[i].in <== path_index[i];
+
+        tmp[i][0] <== hashes[i-1].out * izs[i].out;
+        hashes[i].inputs[0] <== hashes[i-1].out - tmp[i][0]  + path_elements[i] * izs[i].out;
+        
+        tmp[i][1] <== path_elements[0] * izs[i].out;
+        hashes[i].inputs[1] <== hashes[i-1].out * izs[i].out + path_elements[i] - tmp[i][1];
+    }
+
+    root <== hashes[n-1].out;
 }
+g
